@@ -62,3 +62,48 @@ npm run dev -w frontend
 - WhatsApp is the primary outbound channel; sending is simulated as persisted outbound messages.
 - Google Places adapter point exists; mock provider is default for no-key environments.
 - Follow-up queue demonstrates BullMQ automation; real WhatsApp transport can be wired in provider layer.
+
+## Git / GitHub Desktop workflow
+
+### 1) Open as a local repository
+1. Open **GitHub Desktop**.
+2. Click **File → Add Local Repository**.
+3. Select this project folder (`Systems-Analytics`).
+4. GitHub Desktop will detect branch history automatically.
+
+### 2) Publish to GitHub
+1. In GitHub Desktop, click **Publish repository**.
+2. Choose repository name/visibility.
+3. Publish without changing local folder structure.
+
+### 3) Branch naming convention
+Use short, purpose-driven branch names:
+- `feat/<name>`
+- `fix/<name>`
+- `chore/<name>`
+
+Examples:
+- `feat/map-filters`
+- `fix/auth-token-refresh`
+- `chore/readme-update`
+
+### 4) Commit naming convention
+Use lightweight conventional-style messages:
+- `feat: add lead score filter chips`
+- `fix: prevent discarded leads from follow-up queue`
+- `chore: update docker compose env docs`
+
+### 5) Recommended PR workflow for future Codex work
+1. Ensure `main` is up to date (`Fetch origin` / `Pull` in GitHub Desktop).
+2. Create a new branch from `main` for each task.
+3. Make and test changes locally.
+4. Commit in small, focused commits.
+5. Push branch and open a PR on GitHub.
+6. Merge PR after review/checks.
+7. Switch back to `main` and sync before next branch.
+
+### 6) Safe sync habits
+- Pull `main` before starting new work.
+- Avoid direct commits to `main` for feature work.
+- Rebase or merge `main` into long-lived branches regularly.
+- Keep one concern per PR when possible.
