@@ -7,4 +7,4 @@ COPY . .
 WORKDIR /app/backend
 RUN npx prisma generate && npm run build
 EXPOSE 3001
-CMD ["sh", "-c", "npx prisma migrate deploy && npm run prisma:seed && npm run start"]
+CMD ["sh", "-c", "npx prisma migrate deploy && npm run start"]

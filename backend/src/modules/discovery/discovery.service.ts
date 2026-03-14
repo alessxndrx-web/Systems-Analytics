@@ -1,27 +1,46 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
 import { ScoringService } from '../scoring/scoring.service';
 import { AnalyticsService } from '../analytics/analytics.service';
 import { SearchLeadsDto } from './dto/search-leads.dto';
+import { GooglePlacesProvider } from './providers/google-places.provider';
 import { MockPlacesProvider } from './providers/mock-places.provider';
-import { PlaceCandidate } from './providers/places.interface';
+import { PlaceCandidate, PlacesProvider } from './providers/places.interface';
 
 @Injectable()
 export class DiscoveryService {
+  private readonly logger = new Logger(DiscoveryService.name);
+
   constructor(
-    private prisma: PrismaService,
-    private scoring: ScoringService,
-    private analytics: AnalyticsService,
-    private mockProvider: MockPlacesProvider
+    private readonly prisma: PrismaService,
+    private readonly scoring: ScoringService,
+    private readonly analytics: AnalyticsService,
+    private readonly configService: ConfigService,
+    private readonly mockProvider: MockPlacesProvider,
+    private readonly googleProvider: GooglePlacesProvider
   ) {}
 
   async discover(userId: string, dto: SearchLeadsDto) {
-    const places = await this.mockProvider.search(dto.city, dto.country, dto.niche);
+    const provider = this.resolveProvider();
+    const places = await provider.search(dto.city, dto.country, dto.niche);
     const leads = [];
+
     for (const place of places) {
       leads.push(await this.upsertLeadFromPlace(userId, place));
     }
+
     return leads;
+  }
+
+  private resolveProvider(): PlacesProvider {
+    const hasGoogleKey = !!this.configService.get<string>('GOOGLE_PLACES_API_KEY');
+    if (hasGoogleKey) {
+      return this.googleProvider;
+    }
+
+    this.logger.log('GOOGLE_PLACES_API_KEY not set, using MockPlacesProvider fallback');
+    return this.mockProvider;
   }
 
   private async upsertLeadFromPlace(userId: string, place: PlaceCandidate) {

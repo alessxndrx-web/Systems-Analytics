@@ -10,6 +10,7 @@ import { PrismaModule } from './modules/prisma/prisma.module';
 import { ScoringModule } from './modules/scoring/scoring.module';
 import { AiModule } from './modules/ai/ai.module';
 import { LogsModule } from './modules/logs/logs.module';
+import { HealthModule } from './modules/health/health.module';
 
 @Module({
   imports: [
@@ -31,7 +32,8 @@ import { LogsModule } from './modules/logs/logs.module';
     AiModule,
     LeadsModule,
     AnalyticsModule,
-    LogsModule
+    LogsModule,
+    HealthModule
   ]
 })
 export class AppModule {}

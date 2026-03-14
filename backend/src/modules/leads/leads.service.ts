@@ -78,7 +78,8 @@ export class LeadsService {
     const scheduledFor = this.plusDays(new Date(), 3 * step);
     const content = await this.ai.generateFollowUp({ lead: lead.business, step });
     const followUp = await this.prisma.followUp.create({ data: { leadId, scheduledFor, content } });
-    await this.followUpQueue.add('send-followup', { followUpId: followUp.id, leadId, userId }, { delay: 1000 });
+    const delayMs = Math.max(0, followUp.scheduledFor.getTime() - Date.now());
+    await this.followUpQueue.add('send-followup', { followUpId: followUp.id, leadId, userId }, { delay: delayMs });
   }
 
   updateStatus(id: string, status: LeadStatus) {

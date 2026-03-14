@@ -1,109 +1,156 @@
 # LeadMap AI (MVP)
 
-LeadMap AI is a personal (single-user) lead-generation and outreach system.
+LeadMap AI is a single-user lead-generation and outreach MVP built as a monorepo:
+- **Backend:** NestJS + Prisma + PostgreSQL + Redis + BullMQ
+- **Frontend:** Next.js + TypeScript + Tailwind + React Query + Recharts + Leaflet/OSM
 
-## Stack
-- Frontend: Next.js + TypeScript + Tailwind + React Query + Recharts + Leaflet/OSM
-- Backend: NestJS + Prisma + PostgreSQL + Redis + BullMQ
-- AI: OpenAI API with safe fallback templates
-- Infra: Docker Compose
+## Project structure
+- `backend/` NestJS API and worker logic
+- `frontend/` Next.js web app
+- `docker-compose.yml` local orchestration (frontend, backend, postgres, redis)
+- `.env.example` environment template
 
-## Included MVP Modules
-1. Architecture and modular services
-2. Prisma schema + migration + seed
-3. JWT authentication + password hashing + throttling
-4. Lead discovery abstraction with mock provider fallback
-5. Editable scoring rules and 0-100 scoring engine
-6. AI messaging generation layer
-7. CRM states + lead/message/follow-up workflows
-8. Analytics event tracking and dashboard metrics
-9. Interactive Leaflet map + table
-10. Dockerized frontend/backend/postgres/redis
+## Environment variables
+Copy and edit:
 
-## Quick Start
-1. Copy env file:
-   ```bash
-   cp .env.example .env
-   ```
-2. Start full stack:
-   ```bash
-   docker-compose up --build
-   ```
-3. Open apps:
-   - Frontend: http://localhost:3000
-   - Backend: http://localhost:3001
-   - API docs: http://localhost:3001/docs
+```bash
+cp .env.example .env
+```
 
-## Local Development
+Required variables (from `.env.example`):
+- `DATABASE_URL`
+- `JWT_SECRET`
+- `REDIS_HOST`, `REDIS_PORT`
+- `NEXT_PUBLIC_API_URL`
+
+Optional integrations:
+- `GOOGLE_PLACES_API_KEY` (enables Google Places discovery provider)
+- `OPENAI_API_KEY` (enables OpenAI-generated messages)
+
+## Discovery provider behavior
+Lead discovery uses provider selection in backend:
+- If `GOOGLE_PLACES_API_KEY` is present → **GooglePlacesProvider** is used.
+- If key is missing → **MockPlacesProvider** fallback is used.
+
+## Local development
+Install dependencies at repo root:
+
 ```bash
 npm install
+```
+
+Run both apps:
+
+```bash
 npm run dev
 ```
 
-### Backend only
-```bash
-npm run prisma:generate -w backend
-npm run prisma:migrate -w backend
-npm run prisma:seed -w backend
-npm run dev -w backend
-```
+Run manually per service:
 
-### Frontend only
 ```bash
+npm run dev -w backend
 npm run dev -w frontend
 ```
 
-## Seed User
+## Prisma workflow
+Generate Prisma client:
+
+```bash
+npm run prisma:generate -w backend
+```
+
+Apply migrations:
+
+```bash
+npm run prisma:migrate -w backend
+```
+
+Optional seed (manual only):
+
+```bash
+npm run prisma:seed -w backend
+```
+
+Seed user defaults:
 - Email: `admin@leadmap.ai`
 - Password: `admin1234`
 
-## Assumptions
-- Single user owner model.
-- WhatsApp is the primary outbound channel; sending is simulated as persisted outbound messages.
-- Google Places adapter point exists; mock provider is default for no-key environments.
-- Follow-up queue demonstrates BullMQ automation; real WhatsApp transport can be wired in provider layer.
+## Build
+Build both workspaces:
+
+```bash
+npm run build
+```
+
+## Docker workflow
+Start full stack:
+
+```bash
+docker compose up --build
+```
+
+Notes:
+- Backend container runs `prisma migrate deploy` on startup.
+- Backend **does not auto-seed** on startup.
+- To seed manually in Docker, run a one-off command:
+
+```bash
+docker compose exec backend npm run prisma:seed
+```
+
+## Health check
+Backend exposes:
+
+```http
+GET /health
+```
+
+Expected response:
+
+```json
+{ "status": "ok" }
+```
+
+Example check:
+
+```bash
+curl http://localhost:3001/health
+```
+
+## API docs
+Swagger UI:
+- `http://localhost:3001/docs`
+
+See endpoint summary in `docs/API.md`.
+
+## Typed routes decision (frontend)
+`experimental.typedRoutes` remains enabled in `frontend/next.config.js`.
+Navigation links are now defined with statically typed route objects to stay fully compatible with typed routes and prevent dynamic href build failures.
 
 ## Git / GitHub Desktop workflow
+### Open as local repository
+1. Open GitHub Desktop.
+2. **File → Add Local Repository**.
+3. Select this folder.
 
-### 1) Open as a local repository
-1. Open **GitHub Desktop**.
-2. Click **File → Add Local Repository**.
-3. Select this project folder (`Systems-Analytics`).
-4. GitHub Desktop will detect branch history automatically.
+### Publish to GitHub
+1. Click **Publish repository** in GitHub Desktop.
+2. Choose name + visibility and publish.
 
-### 2) Publish to GitHub
-1. In GitHub Desktop, click **Publish repository**.
-2. Choose repository name/visibility.
-3. Publish without changing local folder structure.
-
-### 3) Branch naming convention
-Use short, purpose-driven branch names:
+### Branch naming convention
 - `feat/<name>`
 - `fix/<name>`
 - `chore/<name>`
 
-Examples:
-- `feat/map-filters`
-- `fix/auth-token-refresh`
-- `chore/readme-update`
+### Commit naming convention
+- `feat: ...`
+- `fix: ...`
+- `chore: ...`
 
-### 4) Commit naming convention
-Use lightweight conventional-style messages:
-- `feat: add lead score filter chips`
-- `fix: prevent discarded leads from follow-up queue`
-- `chore: update docker compose env docs`
-
-### 5) Recommended PR workflow for future Codex work
-1. Ensure `main` is up to date (`Fetch origin` / `Pull` in GitHub Desktop).
-2. Create a new branch from `main` for each task.
-3. Make and test changes locally.
-4. Commit in small, focused commits.
-5. Push branch and open a PR on GitHub.
-6. Merge PR after review/checks.
-7. Switch back to `main` and sync before next branch.
-
-### 6) Safe sync habits
-- Pull `main` before starting new work.
-- Avoid direct commits to `main` for feature work.
-- Rebase or merge `main` into long-lived branches regularly.
-- Keep one concern per PR when possible.
+### Lightweight PR workflow
+1. Pull latest `main`.
+2. Create branch from `main`.
+3. Implement and test.
+4. Commit focused changes.
+5. Push branch and open PR.
+6. Merge, then sync `main`.
