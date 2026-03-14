@@ -1,13 +1,30 @@
 import { Injectable } from '@nestjs/common';
+<<<<<<< ours
+import { Business, Prisma } from '@prisma/client';
+import { PrismaService } from '../prisma/prisma.service';
+
+type DbClient = Prisma.TransactionClient | PrismaService;
+
+=======
 import { Business } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 
+>>>>>>> theirs
 @Injectable()
 export class ScoringService {
   constructor(private prisma: PrismaService) {}
 
+<<<<<<< ours
+  private db(client?: DbClient) {
+    return client ?? this.prisma;
+  }
+
+  async scoreBusiness(userId: string, business: Business, client?: DbClient) {
+    const rules = await this.db(client).scoringRule.findMany({ where: { userId, enabled: true } });
+=======
   async scoreBusiness(userId: string, business: Business) {
     const rules = await this.prisma.scoringRule.findMany({ where: { userId, enabled: true } });
+>>>>>>> theirs
     const map = new Map(rules.map((rule) => [rule.key, rule.weight]));
 
     let score = 50;

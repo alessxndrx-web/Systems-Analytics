@@ -5,7 +5,11 @@
   "scripts": {
     "dev": "nest start --watch",
     "build": "nest build",
+<<<<<<< ours
+    "start": "node dist/src/main.js",
+=======
     "start": "node dist/main.js",
+>>>>>>> theirs
     "lint": "eslint .",
     "test": "jest",
     "test:cov": "jest --coverage",
@@ -54,4 +58,8 @@
     "tsx": "^4.19.0",
     "typescript": "^5.5.4"
   }
+<<<<<<< ours
 }
+=======
+}
+>>>>>>> theirs

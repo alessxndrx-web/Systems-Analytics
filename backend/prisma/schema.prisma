@@ -38,6 +38,11 @@ enum EventType {
   REPLY_RECEIVED
   MEETING_SCHEDULED
   DEAL_CLOSED
+<<<<<<< ours
+  FOLLOW_UP_SCHEDULED
+  LEAD_STATUS_CHANGED
+=======
+>>>>>>> theirs
 }
 
 model User {
@@ -48,16 +53,28 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
+<<<<<<< ours
+  leads        Lead[]
+  notes        Note[]
+  messages     Message[]
+  scoringRules ScoringRule[]
+  activityLogs ActivityLog[]
+=======
   leads         Lead[]
   notes         Note[]
   messages      Message[]
   scoringRules  ScoringRule[]
   activityLogs  ActivityLog[]
+>>>>>>> theirs
 }
 
 model Business {
   id              String   @id @default(cuid())
+<<<<<<< ours
+  externalId      String?  @unique
+=======
   externalId       String?  @unique
+>>>>>>> theirs
   name            String
   category        String
   niche           String
@@ -101,8 +118,13 @@ model Lead {
   createdAt        DateTime   @default(now())
   updatedAt        DateTime   @updatedAt
 
+<<<<<<< ours
+  business    Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  owner       User          @relation(fields: [ownerId], references: [id])
+=======
   business    Business       @relation(fields: [businessId], references: [id], onDelete: Cascade)
   owner       User           @relation(fields: [ownerId], references: [id])
+>>>>>>> theirs
   messages    Message[]
   followUps   FollowUp[]
   notes       Note[]
@@ -114,6 +136,17 @@ model Lead {
 }
 
 model Message {
+<<<<<<< ours
+  id        String           @id @default(cuid())
+  leadId    String
+  userId    String
+  direction MessageDirection
+  type      MessageType
+  content   String
+  approved  Boolean          @default(false)
+  sentAt    DateTime?
+  createdAt DateTime         @default(now())
+=======
   id          String           @id @default(cuid())
   leadId       String
   userId       String
@@ -123,6 +156,7 @@ model Message {
   approved    Boolean          @default(false)
   sentAt      DateTime?
   createdAt   DateTime         @default(now())
+>>>>>>> theirs
 
   lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
   user User @relation(fields: [userId], references: [id])
@@ -131,6 +165,15 @@ model Message {
 }
 
 model FollowUp {
+<<<<<<< ours
+  id           String   @id @default(cuid())
+  leadId       String
+  scheduledFor DateTime
+  executedAt   DateTime?
+  status       String   @default("queued")
+  content      String
+  createdAt    DateTime @default(now())
+=======
   id            String   @id @default(cuid())
   leadId         String
   scheduledFor  DateTime
@@ -138,6 +181,7 @@ model FollowUp {
   status        String   @default("queued")
   content       String
   createdAt     DateTime @default(now())
+>>>>>>> theirs
 
   lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
 
@@ -146,8 +190,13 @@ model FollowUp {
 
 model Note {
   id        String   @id @default(cuid())
+<<<<<<< ours
+  leadId    String
+  userId    String
+=======
   leadId     String
   userId     String
+>>>>>>> theirs
   type      String
   content   String
   createdAt DateTime @default(now())
@@ -157,6 +206,16 @@ model Note {
 }
 
 model AnalyticsEvent {
+<<<<<<< ours
+  id        String    @id @default(cuid())
+  leadId    String?
+  eventType EventType
+  city      String?
+  niche     String?
+  metadata  Json?
+  value     Float?
+  createdAt DateTime  @default(now())
+=======
   id         String    @id @default(cuid())
   leadId      String?
   eventType  EventType
@@ -165,12 +224,22 @@ model AnalyticsEvent {
   metadata   Json?
   value      Float?
   createdAt  DateTime  @default(now())
+>>>>>>> theirs
 
   @@index([eventType, createdAt])
   @@index([city, niche])
 }
 
 model Deal {
+<<<<<<< ours
+  id        String   @id @default(cuid())
+  leadId    String
+  name      String
+  amount    Float
+  status    String
+  closedAt  DateTime?
+  createdAt DateTime @default(now())
+=======
   id         String   @id @default(cuid())
   leadId      String
   name       String
@@ -178,6 +247,7 @@ model Deal {
   status     String
   closedAt   DateTime?
   createdAt  DateTime @default(now())
+>>>>>>> theirs
 
   lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
 
@@ -186,7 +256,11 @@ model Deal {
 
 model ScoringRule {
   id        String   @id @default(cuid())
+<<<<<<< ours
+  userId    String
+=======
   userId     String
+>>>>>>> theirs
   key       String
   label     String
   weight    Int
@@ -201,13 +275,22 @@ model ScoringRule {
 
 model ActivityLog {
   id        String   @id @default(cuid())
+<<<<<<< ours
+  userId    String
+  leadId    String?
+=======
   userId     String
   leadId     String?
+>>>>>>> theirs
   action    String
   details   Json?
   createdAt DateTime @default(now())
 
+<<<<<<< ours
+  user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+=======
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+>>>>>>> theirs
   lead Lead? @relation(fields: [leadId], references: [id], onDelete: SetNull)
 
   @@index([createdAt])

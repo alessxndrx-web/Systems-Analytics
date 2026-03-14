@@ -27,4 +27,8 @@ Swagger: `/docs`
 - `GET /analytics/dashboard`
 
 ## Logs
+<<<<<<< ours
+- `GET /logs?page=1&pageSize=25`
+=======
 - `GET /logs`
+>>>>>>> theirs

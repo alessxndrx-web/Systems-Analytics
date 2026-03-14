@@ -4,11 +4,27 @@ import bcrypt from 'bcrypt';
 const prisma = new PrismaClient();
 
 async function main() {
+<<<<<<< ours
+  const email = process.env.SEED_USER_EMAIL?.trim();
+  const password = process.env.SEED_USER_PASSWORD?.trim();
+  const name = process.env.SEED_USER_NAME?.trim() || 'LeadMap Owner';
+
+  if (!email || !password) {
+    throw new Error('Set SEED_USER_EMAIL and SEED_USER_PASSWORD before running prisma:seed.');
+  }
+
+  const passwordHash = await bcrypt.hash(password, 10);
+  const user = await prisma.user.upsert({
+    where: { email },
+    update: { name, passwordHash },
+    create: { email, name, passwordHash }
+=======
   const passwordHash = await bcrypt.hash('admin1234', 10);
   const user = await prisma.user.upsert({
     where: { email: 'admin@leadmap.ai' },
     update: {},
     create: { email: 'admin@leadmap.ai', name: 'LeadMap Owner', passwordHash }
+>>>>>>> theirs
   });
 
   const rules = [

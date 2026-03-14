@@ -1,4 +1,8 @@
 FROM node:20-alpine
+<<<<<<< ours
+RUN apk add --no-cache openssl
+=======
+>>>>>>> theirs
 WORKDIR /app
 COPY package.json package-lock.json* ./
 COPY backend/package.json ./backend/package.json
