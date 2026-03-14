@@ -1,0 +1,214 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum LeadStatus {
+  NEW
+  REVIEWED
+  QUALIFIED
+  DRAFT_READY
+  SENT
+  REPLIED
+  INTERESTED
+  MEETING
+  WON
+  LOST
+  DISCARDED
+}
+
+enum MessageDirection {
+  OUTBOUND
+  INBOUND
+}
+
+enum MessageType {
+  FIRST_CONTACT
+  FOLLOW_UP
+  RESPONSE
+}
+
+enum EventType {
+  LEAD_DISCOVERED
+  MESSAGE_SENT
+  REPLY_RECEIVED
+  MEETING_SCHEDULED
+  DEAL_CLOSED
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  leads         Lead[]
+  notes         Note[]
+  messages      Message[]
+  scoringRules  ScoringRule[]
+  activityLogs  ActivityLog[]
+}
+
+model Business {
+  id              String   @id @default(cuid())
+  externalId       String?  @unique
+  name            String
+  category        String
+  niche           String
+  city            String
+  country         String
+  address         String
+  latitude        Float
+  longitude       Float
+  rating          Float?
+  reviewCount     Int?
+  website         String?
+  phone           String?
+  hasWhatsapp     Boolean  @default(false)
+  digitalPresence Int      @default(50)
+  isChain         Boolean  @default(false)
+  isOutdatedSite  Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  lead Lead?
+
+  @@index([city, niche])
+  @@index([latitude, longitude])
+}
+
+model Lead {
+  id               String     @id @default(cuid())
+  businessId       String     @unique
+  ownerId          String
+  status           LeadStatus @default(NEW)
+  score            Int        @default(0)
+  qualifiedReason  String?
+  aiSummary        String?
+  manualNotes      String?
+  aiNotes          String?
+  firstApprovedAt  DateTime?
+  nextFollowUpDate DateTime?
+  lastContactDate  DateTime?
+  contactedAt      DateTime?
+  discardedAt      DateTime?
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+
+  business    Business       @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  owner       User           @relation(fields: [ownerId], references: [id])
+  messages    Message[]
+  followUps   FollowUp[]
+  notes       Note[]
+  deals       Deal[]
+  activityLog ActivityLog[]
+
+  @@index([status, score])
+  @@index([ownerId, createdAt])
+}
+
+model Message {
+  id          String           @id @default(cuid())
+  leadId       String
+  userId       String
+  direction   MessageDirection
+  type        MessageType
+  content     String
+  approved    Boolean          @default(false)
+  sentAt      DateTime?
+  createdAt   DateTime         @default(now())
+
+  lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([leadId, createdAt])
+}
+
+model FollowUp {
+  id            String   @id @default(cuid())
+  leadId         String
+  scheduledFor  DateTime
+  executedAt    DateTime?
+  status        String   @default("queued")
+  content       String
+  createdAt     DateTime @default(now())
+
+  lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@index([scheduledFor, status])
+}
+
+model Note {
+  id        String   @id @default(cuid())
+  leadId     String
+  userId     String
+  type      String
+  content   String
+  createdAt DateTime @default(now())
+
+  lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id])
+}
+
+model AnalyticsEvent {
+  id         String    @id @default(cuid())
+  leadId      String?
+  eventType  EventType
+  city       String?
+  niche      String?
+  metadata   Json?
+  value      Float?
+  createdAt  DateTime  @default(now())
+
+  @@index([eventType, createdAt])
+  @@index([city, niche])
+}
+
+model Deal {
+  id         String   @id @default(cuid())
+  leadId      String
+  name       String
+  amount     Float
+  status     String
+  closedAt   DateTime?
+  createdAt  DateTime @default(now())
+
+  lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@index([status, createdAt])
+}
+
+model ScoringRule {
+  id        String   @id @default(cuid())
+  userId     String
+  key       String
+  label     String
+  weight    Int
+  enabled   Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, key])
+}
+
+model ActivityLog {
+  id        String   @id @default(cuid())
+  userId     String
+  leadId     String?
+  action    String
+  details   Json?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lead Lead? @relation(fields: [leadId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt])
+}
